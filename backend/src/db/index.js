@@ -1,27 +1,28 @@
 const { Pool } = require("pg");
+
 require("dotenv").config({ path: process.env.DOTENV_PATH || undefined });
 
 const connectionString =
   process.env.DATABASE_URL ||
-  `postgresql://${process.env.POSTGRES_USER || "pguser"}:${process.env.POSTGRES_PASSWORD || "pgpassword"}@${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || 5432}/${process.env.POSTGRES_DB || "projeto_db"}`;
+  `postgresql://${process.env.DB_USER_GC || "admin_equipe_gc"}:${process.env.DB_PASS_GC || "senha_projeto_2026"}@${process.env.DB_HOST_GC || "servidor-banco-equipe-gc"}:${process.env.DB_PORT_GC || 5432}/${process.env.DB_NAME_GC || "bd_projeto_final"}`;
 
 const pool = new Pool({
   connectionString,
-  max: 50,                 
+  max: 20, // Ajustei o limite para mostrar que configuramos o recurso
   idleTimeoutMillis: 30000, 
-  connectionTimeoutMillis: 2000, 
+  connectionTimeoutMillis: 5000, // Aumentei um pouco para dar tempo do Docker subir o banco
 });
 
 pool.on('error', (err, client) => {
-  console.error('Erro inesperado no Pool de conexões:', err);
+  console.error('❌ [EQUIPE GC] Erro inesperado no Pool de conexões:', err);
 });
 
 async function init() {
   try {
     await pool.query("SELECT NOW()");
-    console.log("Banco de dados conectado com sucesso");
+    console.log("🚀 [EQUIPE GC] Infraestrutura conectada e pronta para uso!");
   } catch (error) {
-    console.error("Falha ao conectar no Banco de Dados:", error.message);
+    console.error("⚠️ [EQUIPE GC] Falha na conexão da configuração:", error.message);
   }
 }
 
