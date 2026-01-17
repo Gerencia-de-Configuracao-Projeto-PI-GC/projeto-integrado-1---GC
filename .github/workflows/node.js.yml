@@ -32,5 +32,9 @@ jobs:
 
     - name: Executar Testes
       run: npm test
+      
+    - name: Verificar Build
+      run: npm run make
+
 
       
