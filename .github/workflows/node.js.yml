@@ -11,22 +11,26 @@ on:
 
 jobs:
   testes:
-
+    name: Testes e Lint
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: '20'
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Baixar código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js 20
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '20' # Fixado na versao 20
         cache: 'npm'
-    - run: npm ci # Instala dependências
-    - run: npm lint # Verifica erros de digitação
-    - run: npm run build --if-present # Testa se o projeto é buildável
-    - run: npm test # Roda scripts de teste, se tiver
+
+    - name: Instalar dependências
+      run: npm ci
+
+    - name: Verifica Código
+      run: npm run lint  # Corretor Ortográfico
+
+    - name: Executar Testes
+      run: npm test
+
+      
