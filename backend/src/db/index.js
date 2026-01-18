@@ -3,7 +3,7 @@ require("dotenv").config({ path: process.env.DOTENV_PATH || undefined });
 
 const connectionString =
   process.env.DATABASE_URL ||
-  `postgresql://${process.env.POSTGRES_USER || "pguser"}:${process.env.POSTGRES_PASSWORD || "pgpassword"}@${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || 5432}/${process.env.POSTGRES_DB || "projeto_db"}`;
+      `postgresql://${process.env.DB_USER || 'user_gc'}:${process.env.DB_PASS || 'password_gc'}@${process.env.DB_HOST || 'postgres'}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || 'db_projeto'}`
 
 const pool = new Pool({
   connectionString,

@@ -1,0 +1,51 @@
+services: 
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-database
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - vol_dados_db:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT_EXTERNAL}:5432"
+    networks:
+      - rede-projeto
+    
+  backend:
+    build: ./backend
+    container_name: api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT_INTERNAL}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    networks:
+      - rede-projeto
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin-web
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "8081:80"
+    networks:
+      - rede-projeto
+    
+networks:
+  rede-projeto:
+    driver: bridge
+  
+volumes:
+  vol_dados_db:
