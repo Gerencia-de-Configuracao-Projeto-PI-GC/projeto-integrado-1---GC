@@ -1,85 +1,85 @@
 class ValidationStrategy {
-	validate(payload) {
-	  throw new Error('Método validate deve ser implementado pela estratégia');
-	}
+  validate (payload) {
+	  throw new Error('Método validate deve ser implementado pela estratégia')
   }
-  
-  class AlunoValidationStrategy extends ValidationStrategy {
-	constructor(validateAluno) {
-	  super();
-	  this.validateAluno = validateAluno;
-	}
-  
-	validate(payload) {
-	  return this.validateAluno(payload);
-	}
+}
+
+class AlunoValidationStrategy extends ValidationStrategy {
+  constructor (validateAluno) {
+	  super()
+	  this.validateAluno = validateAluno
   }
-  
-  class PlanoValidationStrategy extends ValidationStrategy {
-	constructor(validatePlano) {
-	  super();
-	  this.validatePlano = validatePlano;
-	}
-  
-	validate(payload) {
-	  return this.validatePlano(payload);
-	}
+
+  validate (payload) {
+	  return this.validateAluno(payload)
   }
-  
-  class PatrimonioValidationStrategy extends ValidationStrategy {
-	constructor(validatePatrimonio) {
-	  super();
-	  this.validatePatrimonio = validatePatrimonio;
-	}
-  
-	validate(payload) {
-	  return this.validatePatrimonio(payload);
-	}
+}
+
+class PlanoValidationStrategy extends ValidationStrategy {
+  constructor (validatePlano) {
+	  super()
+	  this.validatePlano = validatePlano
   }
-  
-  class FinanceiroValidationStrategy extends ValidationStrategy {
-	constructor(validateFinanceiro) {
-	  super();
-	  this.validateFinanceiro = validateFinanceiro;
-	}
-  
-	validate(payload) {
-	  return this.validateFinanceiro(payload);
-	}
+
+  validate (payload) {
+	  return this.validatePlano(payload)
   }
-  
-  class ValidationContext {
-	constructor(strategy) {
-	  this.strategy = strategy;
-	}
-  
-	setStrategy(strategy) {
-	  this.strategy = strategy;
-	}
-  
-	executeValidation(payload) {
+}
+
+class PatrimonioValidationStrategy extends ValidationStrategy {
+  constructor (validatePatrimonio) {
+	  super()
+	  this.validatePatrimonio = validatePatrimonio
+  }
+
+  validate (payload) {
+	  return this.validatePatrimonio(payload)
+  }
+}
+
+class FinanceiroValidationStrategy extends ValidationStrategy {
+  constructor (validateFinanceiro) {
+	  super()
+	  this.validateFinanceiro = validateFinanceiro
+  }
+
+  validate (payload) {
+	  return this.validateFinanceiro(payload)
+  }
+}
+
+class ValidationContext {
+  constructor (strategy) {
+	  this.strategy = strategy
+  }
+
+  setStrategy (strategy) {
+	  this.strategy = strategy
+  }
+
+  executeValidation (payload) {
 	  if (!this.strategy) {
-		 throw new Error("Estratégia de validação não definida no contexto.");
+		 throw new Error('Estratégia de validação não definida no contexto.')
 	  }
-  
-	  const { valid, errors } = this.strategy.validate(payload);
-	  
+
+	  const { valid, errors } = this.strategy.validate(payload)
+
 	  if (!valid) {
-		const err = new Error('Validação falhou');
-		err.status = 400;
-		err.details = errors;
-		throw err;
+      const err = new Error('Validação falhou')
+      err.status = 400
+      err.details = errors
+      throw err
 	  }
-  
-	  return { valid, errors };
-	}
+
+	  return { valid, errors }
   }
-  
-  module.exports = {
-	ValidationStrategy,
-	AlunoValidationStrategy,
-	PlanoValidationStrategy,
-	PatrimonioValidationStrategy,
-	FinanceiroValidationStrategy,
-	ValidationContext
-  };
+}
+
+module.exports = {
+  ValidationStrategy,
+  AlunoValidationStrategy,
+  PlanoValidationStrategy,
+  PatrimonioValidationStrategy,
+  FinanceiroValidationStrategy,
+  ValidationContext
+}

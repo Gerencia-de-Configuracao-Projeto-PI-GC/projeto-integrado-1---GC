@@ -1,12 +1,12 @@
-const repo = require("../repositories/patrimonioRepository");
-const { validatePatrimonio } = require("../models/patrimonio.model");
-const { PatrimonioValidationStrategy, ValidationContext } = require("../patterns/strategies/ValidationStrategy");
-const { ServiceFactory } = require("../patterns/factory/ServiceFactory");
+const repo = require('../repositories/patrimonioRepository')
+const { validatePatrimonio } = require('../models/patrimonio.model')
+const { PatrimonioValidationStrategy, ValidationContext } = require('../patterns/strategies/ValidationStrategy')
+const { ServiceFactory } = require('../patterns/factory/ServiceFactory')
 
-const validationStrategy = new PatrimonioValidationStrategy(validatePatrimonio);
-const validationContext = new ValidationContext(validationStrategy);
+const validationStrategy = new PatrimonioValidationStrategy(validatePatrimonio)
+const validationContext = new ValidationContext(validationStrategy)
 
-const baseService = ServiceFactory.createService(repo, validationContext);
+const baseService = ServiceFactory.createService(repo, validationContext)
 
 module.exports = {
   listAll: () => baseService.listAll(),
@@ -14,4 +14,4 @@ module.exports = {
   create: (payload) => baseService.create(payload),
   update: (id, payload) => baseService.update(id, payload),
   remove: (id) => baseService.remove(id)
-};
+}

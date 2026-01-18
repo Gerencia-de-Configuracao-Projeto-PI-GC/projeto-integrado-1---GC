@@ -1,94 +1,94 @@
-const repo = require("../repositories/alunoRepository");
-const planoRepo = require("../repositories/planosRepository");
-const { validateAluno } = require("../models/alunos.model");
-const { AlunoValidationStrategy, ValidationContext } = require("../patterns/strategies/ValidationStrategy");
-const { ServiceFactory } = require("../patterns/factory/ServiceFactory");
-const CalculoData = require("../patterns/strategies/CalculoData");
+const repo = require('../repositories/alunoRepository')
+const planoRepo = require('../repositories/planosRepository')
+const { validateAluno } = require('../models/alunos.model')
+const { AlunoValidationStrategy, ValidationContext } = require('../patterns/strategies/ValidationStrategy')
+const { ServiceFactory } = require('../patterns/factory/ServiceFactory')
+const CalculoData = require('../patterns/strategies/CalculoData')
 
-const AlunoBuilder = require("../patterns/builder/AlunoBuilder");
+const AlunoBuilder = require('../patterns/builder/AlunoBuilder')
 
-const validationStrategy = new AlunoValidationStrategy(validateAluno);
-const validationContext = new ValidationContext(validationStrategy);
+const validationStrategy = new AlunoValidationStrategy(validateAluno)
+const validationContext = new ValidationContext(validationStrategy)
 
-function gerarMatricula() {
-  const rand = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
-  return `${Date.now()}${rand}`;
+function gerarMatricula () {
+  const rand = String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+  return `${Date.now()}${rand}`
 }
 
-function formatDateToDB(date) {
-  if (!date) return null;
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return null;
-  d.setHours(12, 0, 0, 0);
-  return d.toISOString().split("T")[0];
+function formatDateToDB (date) {
+  if (!date) return null
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return null
+  d.setHours(12, 0, 0, 0)
+  return d.toISOString().split('T')[0]
 }
 
-function calcularNovaData(dataBase, duracao) {
-  const strategy = CalculoData.criarStrategy(duracao);
-  return strategy.calcular(dataBase);
+function calcularNovaData (dataBase, duracao) {
+  const strategy = CalculoData.criarStrategy(duracao)
+  return strategy.calcular(dataBase)
 }
 
-function processarAlunoParaExibicao(aluno) {
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+function processarAlunoParaExibicao (aluno) {
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
 
   if (!aluno.cod_plano || !aluno.data_expiracao) {
-    aluno.status_aluno = "Inativo";
-    aluno.data_expiracao_formatada = "Sem Plano";
-    return aluno;
+    aluno.status_aluno = 'Inativo'
+    aluno.data_expiracao_formatada = 'Sem Plano'
+    return aluno
   }
 
-  const expiracao = new Date(aluno.data_expiracao);
-  expiracao.setHours(0, 0, 0, 0);
+  const expiracao = new Date(aluno.data_expiracao)
+  expiracao.setHours(0, 0, 0, 0)
 
   if (expiracao < hoje) {
-    aluno.status_aluno = "Inativo";
-    aluno.data_expiracao_formatada = "Expirado";
+    aluno.status_aluno = 'Inativo'
+    aluno.data_expiracao_formatada = 'Expirado'
   } else {
-    aluno.data_expiracao_formatada = expiracao.toLocaleDateString("pt-BR", {
-      timeZone: "UTC",
-    });
+    aluno.data_expiracao_formatada = expiracao.toLocaleDateString('pt-BR', {
+      timeZone: 'UTC'
+    })
   }
 
-  return aluno;
+  return aluno
 }
 
 const customMethods = {
-  async listAll() {
-    const alunos = await this.repository.findAll();
-    return alunos.map(processarAlunoParaExibicao);
+  async listAll () {
+    const alunos = await this.repository.findAll()
+    return alunos.map(processarAlunoParaExibicao)
   },
 
-  async getByMatricula(matricula) {
-    const aluno = await this.repository.findByMatricula(matricula);
-    if (!aluno) return null;
-    return processarAlunoParaExibicao(aluno);
+  async getByMatricula (matricula) {
+    const aluno = await this.repository.findByMatricula(matricula)
+    if (!aluno) return null
+    return processarAlunoParaExibicao(aluno)
   },
 
-  async create(payload) {
+  async create (payload) {
     try {
-      let matriculaFinal =
-        payload.matricula || payload.matricula_aluno || gerarMatricula();
+      const matriculaFinal =
+        payload.matricula || payload.matricula_aluno || gerarMatricula()
 
-      let dataExpiracaoDate = null;
-      let statusInicial = "Inativo";
-      let codPlanoFinal = payload.cod_plano || payload.plano || null;
+      let dataExpiracaoDate = null
+      let statusInicial = 'Inativo'
+      const codPlanoFinal = payload.cod_plano || payload.plano || null
 
       if (codPlanoFinal) {
-        const plano = await planoRepo.findByCod(codPlanoFinal);
+        const plano = await planoRepo.findByCod(codPlanoFinal)
         if (plano) {
-          statusInicial = "Ativo";
+          statusInicial = 'Ativo'
           dataExpiracaoDate = calcularNovaData(
             new Date(),
             plano.duracao_unidade
-          );
+          )
         }
       }
 
       const dataNascFinal = formatDateToDB(
         payload.data_nascimento || payload.dataNascimento
-      );
-      const dataExpFinal = formatDateToDB(dataExpiracaoDate);
+      )
+      const dataExpFinal = formatDateToDB(dataExpiracaoDate)
 
       const alunoParaSalvar = new AlunoBuilder()
         .comMatricula(matriculaFinal)
@@ -100,23 +100,23 @@ const customMethods = {
         .comContato(payload.telefone, payload.logradouro, payload.numero)
         .comDadosPessoais(payload.genero, dataNascFinal)
         .comPlano(codPlanoFinal, dataExpFinal, statusInicial)
-        .build();
+        .build()
 
-      console.log("--- DEBUG CREATE ALUNO (BUILDER) ---");
-      console.log(alunoParaSalvar);
+      console.log('--- DEBUG CREATE ALUNO (BUILDER) ---')
+      console.log(alunoParaSalvar)
 
-      return await this.repository.create(alunoParaSalvar);
+      return await this.repository.create(alunoParaSalvar)
     } catch (error) {
-      console.error("Erro ao criar aluno:", error);
-      throw error;
+      console.error('Erro ao criar aluno:', error)
+      throw error
     }
   },
 
-  async update(matricula, payload) {
+  async update (matricula, payload) {
     const dataNasc =
       payload.data_nascimento || payload.dataNascimento
         ? formatDateToDB(payload.data_nascimento || payload.dataNascimento)
-        : undefined;
+        : undefined
 
     const alunoUpdate = new AlunoBuilder()
       .comIdentificacao(
@@ -127,70 +127,70 @@ const customMethods = {
       .comContato(payload.telefone, payload.logradouro, payload.numero)
       .comDadosPessoais(payload.genero, dataNasc)
       .comPlano(payload.cod_plano, null, payload.status_aluno || payload.status)
-      .build();
+      .build()
 
-    alunoUpdate.matricula = matricula;
+    alunoUpdate.matricula = matricula
 
     Object.keys(alunoUpdate).forEach((key) => {
-      if (alunoUpdate[key] === undefined) delete alunoUpdate[key];
-    });
+      if (alunoUpdate[key] === undefined) delete alunoUpdate[key]
+    })
 
-    return this.repository.update(matricula, alunoUpdate);
+    return this.repository.update(matricula, alunoUpdate)
   },
 
-  async renew(matriculas, codPlanoNovo) {
-    const plano = await planoRepo.findByCod(codPlanoNovo);
-    if (!plano) throw new Error("Plano não encontrado");
+  async renew (matriculas, codPlanoNovo) {
+    const plano = await planoRepo.findByCod(codPlanoNovo)
+    if (!plano) throw new Error('Plano não encontrado')
 
-    const duracao = plano.duracao_unidade;
-    console.log(`[RENOVAÇÃO] Plano: ${plano.nome_plano} (${duracao})`);
+    const duracao = plano.duracao_unidade
+    console.log(`[RENOVAÇÃO] Plano: ${plano.nome_plano} (${duracao})`)
 
     const promises = matriculas.map(async (matricula) => {
-      const aluno = await this.repository.findByMatricula(matricula);
-      if (!aluno) return;
+      const aluno = await this.repository.findByMatricula(matricula)
+      if (!aluno) return
 
-      const hoje = new Date();
-      hoje.setHours(12, 0, 0, 0);
+      const hoje = new Date()
+      hoje.setHours(12, 0, 0, 0)
 
-      let dataBase;
+      let dataBase
 
       if (aluno.data_expiracao) {
-        const expAtual = new Date(aluno.data_expiracao);
-        expAtual.setHours(12, 0, 0, 0);
+        const expAtual = new Date(aluno.data_expiracao)
+        expAtual.setHours(12, 0, 0, 0)
 
         if (expAtual >= hoje) {
-          dataBase = expAtual;
+          dataBase = expAtual
         } else {
-          dataBase = hoje;
+          dataBase = hoje
         }
       } else {
-        dataBase = hoje;
+        dataBase = hoje
       }
 
-      const novaData = calcularNovaData(dataBase, duracao);
-      const novaDataFormatada = formatDateToDB(novaData);
+      const novaData = calcularNovaData(dataBase, duracao)
+      const novaDataFormatada = formatDateToDB(novaData)
 
       await this.repository.updateRenovacao(
         matricula,
         codPlanoNovo,
         novaDataFormatada
-      );
-    });
+      )
+    })
 
-    await Promise.all(promises);
-    return { success: true };
+    await Promise.all(promises)
+    return { success: true }
   },
 
-  async updateStatusByPayment(matricula, status) {
-    return this.repository.updateStatus(matricula, status);
-  },
-};
+  async updateStatusByPayment (matricula, status) {
+    return this.repository.updateStatus(matricula, status)
+  }
+}
 
 const service = ServiceFactory.createCustomService(
   repo,
   validationContext,
   customMethods
-);
+)
 
 module.exports = {
   listAll: () => service.listAll(),
@@ -200,5 +200,5 @@ module.exports = {
   remove: (matricula) => service.remove(matricula),
   updateStatusByPayment: (matricula, status) =>
     service.updateStatusByPayment(matricula, status),
-  renew: (matriculas, codPlanoNovo) => service.renew(matriculas, codPlanoNovo),
-};
+  renew: (matriculas, codPlanoNovo) => service.renew(matriculas, codPlanoNovo)
+}

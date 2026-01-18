@@ -1,85 +1,85 @@
-const express = require("express");
-const router = express.Router();
-const service = require("../services/alunoService");
+const express = require('express')
+const router = express.Router()
+const service = require('../services/alunoService')
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const rows = await service.listAll();
-    res.json(rows);
+    const rows = await service.listAll()
+    res.json(rows)
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Falhou ao listar alunos" });
+    console.error(err)
+    res.status(500).json({ error: 'Falhou ao listar alunos' })
   }
-});
+})
 
-router.get("/:matricula", async (req, res) => {
+router.get('/:matricula', async (req, res) => {
   try {
-    const row = await service.getByMatricula(req.params.matricula);
+    const row = await service.getByMatricula(req.params.matricula)
 
-    if (!row) return res.status(404).json({ error: "Aluno não encontrado" });
+    if (!row) return res.status(404).json({ error: 'Aluno não encontrado' })
 
-    res.json(row);
+    res.json(row)
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Falhou ao obter aluno" });
+    console.error(err)
+    res.status(500).json({ error: 'Falhou ao obter aluno' })
   }
-});
+})
 
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const created = await service.create(req.body);
-    res.status(201).json(created);
+    const created = await service.create(req.body)
+    res.status(201).json(created)
   } catch (err) {
-    console.error(err);
-    if (err.status)
+    console.error(err)
+    if (err.status) {
       return res
         .status(err.status)
-        .json({ error: err.message, details: err.details });
-    res.status(500).json({ error: "Falhou ao criar aluno" });
+        .json({ error: err.message, details: err.details })
+    }
+    res.status(500).json({ error: 'Falhou ao criar aluno' })
   }
-});
+})
 
-router.put("/:matricula", async (req, res) => {
+router.put('/:matricula', async (req, res) => {
   try {
-    const updated = await service.update(req.params.matricula, req.body);
+    const updated = await service.update(req.params.matricula, req.body)
 
-    if (!updated)
-      return res.status(404).json({ error: "Aluno não encontrado" });
+    if (!updated) { return res.status(404).json({ error: 'Aluno não encontrado' }) }
 
-    res.json(updated);
+    res.json(updated)
   } catch (err) {
-    console.error(err);
-    if (err.status)
+    console.error(err)
+    if (err.status) {
       return res
         .status(err.status)
-        .json({ error: err.message, details: err.details });
-    res.status(500).json({ error: "Falhou ao atualizar aluno" });
+        .json({ error: err.message, details: err.details })
+    }
+    res.status(500).json({ error: 'Falhou ao atualizar aluno' })
   }
-});
+})
 
-router.delete("/:matricula", async (req, res) => {
+router.delete('/:matricula', async (req, res) => {
   try {
-    const removed = await service.remove(req.params.matricula);
+    const removed = await service.remove(req.params.matricula)
 
-    if (!removed)
-      return res.status(404).json({ error: "Aluno não encontrado" });
+    if (!removed) { return res.status(404).json({ error: 'Aluno não encontrado' }) }
 
-    res.json({ removed: true });
+    res.json({ removed: true })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Falhou ao deletar aluno" });
+    console.error(err)
+    res.status(500).json({ error: 'Falhou ao deletar aluno' })
   }
-});
+})
 
 router.post('/renovar', async (req, res) => {
-    try {
-        const { matriculas, cod_plano } = req.body;
-        await service.renew(matriculas, cod_plano);
-        res.status(200).json({ message: "Renovação concluída!" });
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err.message });
-    }
-});
+  try {
+    const { matriculas, cod_plano } = req.body
+    await service.renew(matriculas, cod_plano)
+    res.status(200).json({ message: 'Renovação concluída!' })
+  } catch (err) {
+    console.error(err)
+    res.status(400).json({ error: err.message })
+  }
+})
 
-module.exports = router;
+module.exports = router
