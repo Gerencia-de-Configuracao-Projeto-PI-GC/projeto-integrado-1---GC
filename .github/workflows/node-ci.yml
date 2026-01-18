@@ -32,10 +32,10 @@ jobs:
       run: npm ci
 
     - name: Verifica Código
-      run: npm run lint --if-exists || true
+      run: npm run lint || true
 
     - name: Executar Testes
-      run: npm test --if-exists
+      run: npm test
       
     - name: Verificar Build
-      run: npm run build --if-exists || true
+      run: npm run build || true
